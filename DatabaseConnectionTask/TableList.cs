@@ -1,23 +1,29 @@
-﻿using System;
+﻿using DatabaseConnectionTask.Model;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace DatabaseConnectionTask
 {
     public partial class TableList : Form
     {
+        private SqlConnection connection;
+        private string connectionString;
         private CheckedListBox checkedListBoxTables;
         private Button submitButton;
 
-        public TableList(List<string> tableNames,string Dbname)
+        public TableList(List<string> tableNames, string Dbname,string connectionString)
         {
             InitializeComponent();
+            this.connectionString = connectionString;
             InitializeCheckedListBox(tableNames, Dbname);
             submitButton.Click += SubmitButton_Click;
         }
@@ -26,7 +32,7 @@ namespace DatabaseConnectionTask
         {
             // Create and style the title label
             Label titleLabel = new Label();
-            titleLabel.Text = "Tables List of "+ Dbname;
+            titleLabel.Text = "Tables List of " + Dbname;
             titleLabel.Font = new Font("Arial", 16, FontStyle.Bold);
             titleLabel.TextAlign = ContentAlignment.MiddleCenter;
             titleLabel.Dock = DockStyle.Top;
@@ -76,10 +82,58 @@ namespace DatabaseConnectionTask
             }
 
             // Do something with the checked items
-            string message = "Checked items:\n" + string.Join("\n", checkedItems);
+            string message = string.Join("$", checkedItems);
+            TableDetails(checkedItems, connectionString);
             MessageBox.Show("Table data submitted");
             this.Close();
         }
-        
+
+        private void TableDetails(List<string> checkedItems, string connectionString)
+        {
+            List<TableDetail> tableDetailsList = new List<TableDetail>();
+            List<object> tablesList = new List<object>();
+            try
+            {
+                foreach (string item in checkedItems)
+                {
+                    connection = new SqlConnection(connectionString);
+                    connection.Open(); // Open the connection
+
+                        string query = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{item}';";
+                        SqlCommand command = new SqlCommand(query, connection);
+                        SqlDataReader reader = command.ExecuteReader();
+
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                TableDetail tableDetail = new TableDetail();
+                                tableDetail.TableName = item.ToString();
+                                tableDetail.ColumnName = reader["COLUMN_NAME"].ToString();
+                                tableDetail.DataType = reader["DATA_TYPE"].ToString();
+                                tableDetail.MaxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
+                                tableDetail.Nullable = reader["IS_NULLABLE"].ToString();
+
+                                tableDetailsList.Add(tableDetail);
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("No tables found in the database.");
+                        }
+                      tablesList.Add(tableDetailsList);
+                        reader.Close();
+                }
+                //if(tableDetailsList.Count > 0)
+                //Console.WriteLine(tablesList);
+            }
+
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while filling checkbox list: " + ex.Message);
+            }
+        }
+
+
     }
 }

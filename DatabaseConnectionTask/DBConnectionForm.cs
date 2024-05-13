@@ -1,3 +1,4 @@
+using DatabaseConnectionTask.Model;
 using System.Data.SqlClient;
 using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -106,7 +107,7 @@ namespace DatabaseConnectionTask
                     FillCheckboxList(dbName, tableNames);
 
                     // Show the TableList form and pass the table names
-                    TableList tableListForm = new TableList(tableNames, dbName);
+                    TableList tableListForm = new TableList(tableNames, dbName, connectionString);
                     tableListForm.Show();
                 }
                 else
@@ -154,19 +155,5 @@ namespace DatabaseConnectionTask
             }
         }
 
-        private void DBConnection_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Title_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

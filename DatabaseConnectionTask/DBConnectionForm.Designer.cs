@@ -50,7 +50,6 @@
             Title.Size = new Size(386, 37);
             Title.TabIndex = 0;
             Title.Text = "Database Connection Details";
-            Title.Click += Title_Click;
             // 
             // Server
             // 
@@ -160,7 +159,6 @@
             Controls.Add(Title);
             Name = "DBConnection";
             Text = "DatabaseConnectionForm";
-            Load += DBConnection_Load;
             ResumeLayout(false);
             PerformLayout();
         }
