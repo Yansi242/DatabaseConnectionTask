@@ -20,7 +20,7 @@ namespace DatabaseConnectionTask
         private CheckedListBox checkedListBoxTables;
         private Button submitButton;
 
-        public TableList(List<string> tableNames, string Dbname,string connectionString)
+        public TableList(List<string> tableNames, string Dbname, string connectionString)
         {
             InitializeComponent();
             this.connectionString = connectionString;
@@ -91,42 +91,47 @@ namespace DatabaseConnectionTask
         private void TableDetails(List<string> checkedItems, string connectionString)
         {
             List<TableDetail> tableDetailsList = new List<TableDetail>();
-            List<object> tablesList = new List<object>();
             try
             {
+                
                 foreach (string item in checkedItems)
                 {
                     connection = new SqlConnection(connectionString);
                     connection.Open(); // Open the connection
 
-                        string query = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{item}';";
-                        SqlCommand command = new SqlCommand(query, connection);
-                        SqlDataReader reader = command.ExecuteReader();
-
-                        if (reader.HasRows)
+                    string query = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{item}';";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+                    
+                    TableDetail tableDetail = new TableDetail();
+                    if (reader.HasRows)
+                    {
+                        
+                        List<TableView> tables = new List<TableView>(); 
+                        
+                        while (reader.Read())
                         {
-                            while (reader.Read())
-                            {
-                                TableDetail tableDetail = new TableDetail();
-                                tableDetail.TableName = item.ToString();
-                                tableDetail.ColumnName = reader["COLUMN_NAME"].ToString();
-                                tableDetail.DataType = reader["DATA_TYPE"].ToString();
-                                tableDetail.MaxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
-                                tableDetail.Nullable = reader["IS_NULLABLE"].ToString();
+                            TableView tableView = new TableView();
+                            tableView.ColumnName = reader["COLUMN_NAME"].ToString();
+                            tableView.DataType = reader["DATA_TYPE"].ToString();
+                            tableView.MaxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
+                            tableView.Nullable = reader["IS_NULLABLE"].ToString();
 
-                                tableDetailsList.Add(tableDetail);
-                            }
+                            tables.Add(tableView);
                         }
-                        else
-                        {
-                            MessageBox.Show("No tables found in the database.");
-                        }
-                      tablesList.Add(tableDetailsList);
-                        reader.Close();
+                        tableDetail.TableName = item.ToString();
+                        tableDetail.tableViews = tables;
+                    }
+                    else
+                    {
+                        MessageBox.Show("No tables found in the database.");
+                    }
+                    reader.Close();
+                    tableDetailsList.Add(tableDetail);
                 }
-                //if(tableDetailsList.Count > 0)
-                //Console.WriteLine(tablesList);
-            }
+                TableDetails tableDetailsForm = new TableDetails(tableDetailsList);
+                tableDetailsForm.Show();
+            }   
 
             catch (Exception ex)
             {
