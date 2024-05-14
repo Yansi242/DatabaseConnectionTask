@@ -2,25 +2,34 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace DatabaseConnectionTask
 {
     public partial class TableDetails : Form
     {
-        public TableDetails(List<TableDetail> tabledetails)
+        private List<TableDetail> tableDetails;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private Panel panel1;
+        private List<string> tableNames;
+        private string connectionString;
+        private string dbName;
+        private Button submitButton;
+        private Button backButton;
+
+        public TableDetails(List<TableDetail> tableDetails, List<string> tableNames, string dbName, string connectionString)
         {
             InitializeComponent();
-            InitializeTableDetailsBox(tabledetails);
+            this.tableDetails = tableDetails;
+            this.tableNames = tableNames;
+            this.dbName = dbName;
+            this.connectionString = connectionString;
+            InitializeControls();
+            InitializeButtons();
         }
 
-        private void InitializeTableDetailsBox(List<TableDetail> tabledetails)
+        private void InitializeControls()
         {
             // Create and style the title label
             Label titleLabel = new Label();
@@ -31,35 +40,48 @@ namespace DatabaseConnectionTask
             titleLabel.Height = 50;
             this.Controls.Add(titleLabel);
 
-            // Create TableLayoutPanel to organize controls
-            TableLayoutPanel tableLayoutPanel = new TableLayoutPanel();
-            tableLayoutPanel.Dock = DockStyle.Fill;
-            tableLayoutPanel.RowCount = tabledetails.Count + 1; // +1 for title
-            tableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50)); // Title row
+            backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            panel1 = new Panel();
+            SuspendLayout();
+            // 
+            // panel1
+            // 
+            panel1.AutoSize = true;
+            panel1.Location = new Point(61, 40);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(1030, 420);
+            panel1.TabIndex = 0;
+            panel1.AutoScroll = true;
+            this.Controls.Add(panel1);
 
-            // Add controls to TableLayoutPanel
-            tableLayoutPanel.Controls.Add(titleLabel, 0, 0);
+            // Create a panel to contain table details
+            //Panel panel = new Panel();
+            //panel.Dock = DockStyle.Fill;
+            //panel.Height = 30;
+            //this.Controls.Add(panel);
 
-            int rowIndex = 1; // Start from 1 to skip the title row
-            foreach (var data in tabledetails)
+            int currentTop = titleLabel.Bottom + 10; // Start position for table names and details
+
+            foreach (var data in tableDetails)
             {
-
-                // Assuming tableDetail is an object containing TableName, ColumnName, DataType, MaxLength, IsNullable
-                // You can adjust this part according to your actual data structure        
                 // Create CheckBox for table selection
                 CheckBox tableCheckBox = new CheckBox();
-                tableCheckBox.Text = data.TableName; // TableName
-                tableCheckBox.CheckedChanged += TableCheckBox_CheckedChanged;
+                tableCheckBox.Text = data.TableName;
+                tableCheckBox.AutoSize = true;
+                tableCheckBox.Top = currentTop;
+                tableCheckBox.Left = 20;
+                panel1.Controls.Add(tableCheckBox);
 
                 // Create DataGridView to display table details
                 DataGridView tableDataGridView = new DataGridView();
-                tableDataGridView.Dock = DockStyle.Fill;
                 tableDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
                 tableDataGridView.RowHeadersVisible = false;
                 tableDataGridView.AllowUserToAddRows = false;
                 tableDataGridView.AllowUserToDeleteRows = false;
                 tableDataGridView.AllowUserToResizeRows = false;
+                tableDataGridView.Width = 1000;
                 tableDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+                tableDataGridView.Location = new Point(20, currentTop + tableCheckBox.Height + 5); // Position below checkbox
 
                 // Define columns
                 tableDataGridView.Columns.Add("ColumnName", "Column Name");
@@ -67,40 +89,60 @@ namespace DatabaseConnectionTask
                 tableDataGridView.Columns.Add("MaxLength", "Max Length");
                 tableDataGridView.Columns.Add("Nullable", "Is Nullable");
 
-                foreach (TableView row in data.tableViews)
+                foreach (var row in data.tableViews)
                 {
                     tableDataGridView.Rows.Add(row.ColumnName, row.DataType, row.MaxLength, row.Nullable);
-
                 }
-                // Add data
 
-                // Add controls to TableLayoutPanel
-                tableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // AutoSize for each row
-                tableLayoutPanel.Controls.Add(tableCheckBox, 0, rowIndex);
-                tableLayoutPanel.Controls.Add(tableDataGridView, 1, rowIndex);
+                // Set DataGridView height based on the number of rows
+                int dgvHeight = (data.tableViews.Count + 1) * 25; // Header + rows
+                tableDataGridView.Height = Math.Min(dgvHeight, 150); // Limit to 150 pixels max
 
-                rowIndex++;
-            }
+                panel1.Controls.Add(tableDataGridView);
 
-            this.Controls.Add(tableLayoutPanel);
-        }
-
-        private void TableCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            // Handling select all/deselect all logic
-            CheckBox checkBox = sender as CheckBox;
-            foreach (Control control in this.Controls)
-            {
-                if (control is CheckBox && control != checkBox)
-                {
-                    ((CheckBox)control).Checked = checkBox.Checked;
-                }
+                currentTop += tableCheckBox.Height + 5 + tableDataGridView.Height + 10; // Adjust for next set
             }
         }
 
-        private void TableDetails_Load(object sender, EventArgs e)
+        private void InitializeButtons()
         {
+            // Create and style the submit button
+            submitButton = new Button();
+            submitButton.Text = "Submit";
+            submitButton.Font = new Font("Arial", 12, FontStyle.Regular);
+            submitButton.BackColor = Color.GhostWhite;
+            submitButton.ForeColor = Color.Black;
+            submitButton.Width = 100;
+            submitButton.Height = 35;
+            submitButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right; // Anchor to bottom-right
+            submitButton.Location = new Point(panel1.Left + panel1.Width - submitButton.Width, panel1.Bottom + 20); // Below the panel
+            submitButton.Click += SubmitButton_Click;
+            this.Controls.Add(submitButton);
 
+            // Create and style the back button
+            backButton = new Button();
+            backButton.Text = "Back";
+            backButton.Font = new Font("Arial", 12, FontStyle.Regular);
+            backButton.BackColor = Color.GhostWhite;
+            backButton.ForeColor = Color.Black;
+            backButton.Width = 100;
+            backButton.Height = 35;
+            backButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right; // Anchor to bottom-right
+            backButton.Location = new Point(submitButton.Left - backButton.Width - 10, submitButton.Top); // Align with submit button
+            this.Controls.Add(backButton);
+            backButton.Click += BackButton_Click;
+        }
+
+        private void SubmitButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Submit button clicked");
+        }
+
+        private void BackButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            TableList tableListForm = new TableList(tableNames, dbName, connectionString);
+            tableListForm.Show();
         }
     }
 }
