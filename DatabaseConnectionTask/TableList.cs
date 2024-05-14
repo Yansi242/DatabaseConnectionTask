@@ -25,7 +25,7 @@ namespace DatabaseConnectionTask
             this.connectionString = connectionString;
             this.tableNames = tableNames;
             this.Databasename = Dbname;
-            InitializeCheckedListBox(tableNames, Dbname);
+            //InitializeCheckedListBox(tableNames, Dbname);
             InitializeListView(tableNames, Dbname);
             submitButton.Click += SubmitButton_Click;
         }
