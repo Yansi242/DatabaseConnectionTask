@@ -84,7 +84,7 @@ namespace DatabaseConnectionTask
             // Do something with the checked items
             string message = string.Join("$", checkedItems);
             TableDetails(checkedItems, connectionString);
-            MessageBox.Show("Table data submitted");
+            //MessageBox.Show("Table data submitted");
             this.Close();
         }
 
@@ -93,7 +93,6 @@ namespace DatabaseConnectionTask
             List<TableDetail> tableDetailsList = new List<TableDetail>();
             try
             {
-                
                 foreach (string item in checkedItems)
                 {
                     connection = new SqlConnection(connectionString);
