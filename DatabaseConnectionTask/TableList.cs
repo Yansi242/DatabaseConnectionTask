@@ -182,5 +182,10 @@ namespace DatabaseConnectionTask
                 MessageBox.Show("Error while filling checkbox list: " + ex.Message);
             }
         }
+
+        private void TableList_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

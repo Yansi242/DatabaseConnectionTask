@@ -38,7 +38,7 @@
             ClientSize = new Size(800, 431);
             Name = "TableList";
             Text = "TableList";
-            //Load += TableList_Load;
+            Load += TableList_Load;
             ResumeLayout(false);
         }
 
