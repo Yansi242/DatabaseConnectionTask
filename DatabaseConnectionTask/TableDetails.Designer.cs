@@ -37,6 +37,7 @@
             ClientSize = new Size(800, 450);
             Name = "TableDetails";
             Text = "TableDetails";
+            Load += TableDetails_Load;
             ResumeLayout(false);
         }
 

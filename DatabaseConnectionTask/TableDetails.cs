@@ -41,7 +41,7 @@ namespace DatabaseConnectionTask
             tableLayoutPanel.Controls.Add(titleLabel, 0, 0);
 
             int rowIndex = 1; // Start from 1 to skip the title row
-            foreach(var data in tabledetails) 
+            foreach (var data in tabledetails)
             {
 
                 // Assuming tableDetail is an object containing TableName, ColumnName, DataType, MaxLength, IsNullable
@@ -67,9 +67,9 @@ namespace DatabaseConnectionTask
                 tableDataGridView.Columns.Add("MaxLength", "Max Length");
                 tableDataGridView.Columns.Add("Nullable", "Is Nullable");
 
-                foreach(TableView row in data.tableViews)
+                foreach (TableView row in data.tableViews)
                 {
-                    tableDataGridView.Rows.Add(row.ColumnName, row.DataType,row.MaxLength,row.Nullable);
+                    tableDataGridView.Rows.Add(row.ColumnName, row.DataType, row.MaxLength, row.Nullable);
 
                 }
                 // Add data
@@ -96,6 +96,11 @@ namespace DatabaseConnectionTask
                     ((CheckBox)control).Checked = checkBox.Checked;
                 }
             }
+        }
+
+        private void TableDetails_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DatabaseConnectionTask
 {
-    partial class TableList
+    partial class TableDetailModel
     {
         /// <summary>
         /// Required designer variable.
@@ -30,15 +30,14 @@
         {
             SuspendLayout();
             // 
-            // TableList
+            // TableDetailModel
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.White;
-            ClientSize = new Size(800, 431);
-            Name = "TableList";
-            Text = "TableList";
-            //Load += TableList_Load;
+            ClientSize = new Size(800, 450);
+            Name = "TableDetailModel";
+            Text = "TableDetailModel";
+            Load += TableDetailModel_Load;
             ResumeLayout(false);
         }
 

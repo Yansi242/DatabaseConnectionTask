@@ -155,5 +155,12 @@ namespace DatabaseConnectionTask
             }
         }
 
+        private void DBConnection_Load(object sender, EventArgs e)
+        {
+            //List<string> tableNames = new List<string> { "Refund", "City", "Class" };
+            //string Dbname = "SuperariLife";
+            //TableList tableList = new TableList(tableNames , Dbname , "");
+            //tableList.Show();
+        }
     }
 }
