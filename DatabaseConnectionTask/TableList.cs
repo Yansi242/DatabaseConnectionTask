@@ -214,5 +214,10 @@ namespace DatabaseConnectionTask
             databaseConnectionForm.Show();
             this.Hide();
         }
+
+        private void TableList_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
