@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
@@ -19,11 +20,15 @@ namespace DatabaseConnectionTask
         private string connectionString;
         private CheckedListBox checkedListBoxTables;
         private Button submitButton;
+        private List<string> tableNames;
+        private string Databasename;
 
         public TableList(List<string> tableNames, string Dbname, string connectionString)
         {
             InitializeComponent();
             this.connectionString = connectionString;
+            this.tableNames = tableNames;
+            this.Databasename = Dbname;
             InitializeCheckedListBox(tableNames, Dbname);
             submitButton.Click += SubmitButton_Click;
         }
@@ -51,6 +56,7 @@ namespace DatabaseConnectionTask
             // Add table names to the checkedListBoxTables
             checkedListBoxTables.Items.AddRange(tableNames.ToArray());
 
+
             // Create and style the submit button
             // 
             // submit
@@ -64,6 +70,19 @@ namespace DatabaseConnectionTask
             submitButton.Height = 35; // Setting a specific height
             submitButton.Location = new Point((this.ClientSize.Width - submitButton.Width) / 2, this.ClientSize.Height - submitButton.Height - 20); // Adjust location
             this.Controls.Add(submitButton);
+
+            // Create and style the back button
+            Button backButton = new Button();
+            backButton.Text = "Back";
+            backButton.Font = new Font("Arial", 12, FontStyle.Regular);
+            backButton.BackColor = Color.GhostWhite; // Setting a different background color
+            backButton.ForeColor = Color.Black; // Setting text color
+            backButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left; // Anchor to bottom-left
+            backButton.Width = 100; // Setting a small width size
+            backButton.Height = 35; // Setting a specific height
+            backButton.Location = new Point((this.ClientSize.Width - backButton.Width) / 2 - submitButton.Width - 20, this.ClientSize.Height - backButton.Height - 20); // Adjust location
+            backButton.Click += BackButton_Click; // Handle click event
+            this.Controls.Add(backButton);
 
             // Adjust form layout to center contents vertically
             int totalHeight = titleLabel.Height + checkedListBoxTables.Height + submitButton.Height;
@@ -99,6 +118,7 @@ namespace DatabaseConnectionTask
                     connection.Open(); // Open the connection
 
                     string query = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{item}';";
+                    //string query = $"SELECT IU.COLUMN_NAME,IS1.DATA_TYPE  FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE IU INNER JOIN INFORMATION_SCHEMA.COLUMNS IS1 ON IU.TABLE_NAME = IS1.TABLE_NAME AND IU.COLUMN_NAME = IS1.COLUMN_NAME  WHERE IU.TABLE_NAME = '{item}' AND IU.CONSTRAINT_NAME LIKE '%PK%'";
                     SqlCommand command = new SqlCommand(query, connection);
                     SqlDataReader reader = command.ExecuteReader();
                     
@@ -128,7 +148,7 @@ namespace DatabaseConnectionTask
                     reader.Close();
                     tableDetailsList.Add(tableDetail);
                 }
-                TableDetails tableDetailsForm = new TableDetails(tableDetailsList);
+                TableDetails tableDetailsForm = new TableDetails(tableDetailsList,this.tableNames,this.Databasename,this.connectionString);
                 tableDetailsForm.Show();
             }   
 
@@ -138,6 +158,13 @@ namespace DatabaseConnectionTask
             }
         }
 
-
+        private void BackButton_Click(object sender, EventArgs e)
+        {
+            // Close the current form and show DatabaseConnectionForm
+            this.Close();
+            DBConnection databaseConnectionForm = new DBConnection();
+            databaseConnectionForm.Show();
+            this.Hide();
+        }
     }
 }

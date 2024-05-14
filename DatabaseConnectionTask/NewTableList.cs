@@ -10,16 +10,12 @@ using System.Windows.Forms;
 
 namespace DatabaseConnectionTask
 {
-    public partial class Loader : Form
+    public partial class NewTableList : Form
     {
-        public Loader()
+        public NewTableList()
         {
             InitializeComponent();
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
     }
 }
