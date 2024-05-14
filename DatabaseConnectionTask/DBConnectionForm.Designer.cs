@@ -159,6 +159,7 @@
             Controls.Add(Title);
             Name = "DBConnection";
             Text = "DatabaseConnectionForm";
+            Load += DBConnection_Load;
             ResumeLayout(false);
             PerformLayout();
         }
