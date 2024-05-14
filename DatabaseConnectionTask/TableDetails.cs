@@ -49,7 +49,7 @@ namespace DatabaseConnectionTask
             panel1.AutoSize = true;
             panel1.Location = new Point(61, 40);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1030, 420);
+            panel1.Size = new Size(1040, 420);
             panel1.TabIndex = 0;
             panel1.AutoScroll = true;
             this.Controls.Add(panel1);
