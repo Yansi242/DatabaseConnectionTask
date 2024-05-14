@@ -95,7 +95,7 @@ namespace DatabaseConnectionTask
 
             // Do something with the checked items
             TableDetails(checkedItems, connectionString);
-            MessageBox.Show("Table data submitted");
+            //MessageBox.Show("Table data submitted");
             this.Close();
         }
 
