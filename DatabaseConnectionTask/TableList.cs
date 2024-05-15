@@ -115,10 +115,19 @@ namespace DatabaseConnectionTask
                 checkedItems.Add(item.Text);
             }
 
-            // Do something with the checked items
-            TableDetails(checkedItems, connectionString);
-            //MessageBox.Show("Table data submitted");
-            this.Close();
+            if(checkedItems.Count > 0)
+            {
+                // Do something with the checked items
+                TableDetails(checkedItems, connectionString);
+                //MessageBox.Show("Table data submitted");
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Please Select Tables for next step !!");
+                this.Show();
+            }
+            
         }
 
         private void ShowTableDetails(string tableName)
@@ -138,15 +147,16 @@ namespace DatabaseConnectionTask
                 while (reader.Read())
                 {
                     TableView tableView = new TableView();
-                    tableView.ColumnName = reader["COLUMN_NAME"].ToString();
-                    tableView.DataType = reader["DATA_TYPE"].ToString();
-                    tableView.MaxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
-                    tableView.Nullable = reader["IS_NULLABLE"].ToString();
+                    tableView.tableName = tableName;
+                    tableView.columnName = reader["COLUMN_NAME"].ToString();
+                    tableView.dataType = reader["DATA_TYPE"].ToString();
+                    tableView.maxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
+                    tableView.nullable = reader["IS_NULLABLE"].ToString();
 
                     tables.Add(tableView);
                 }
-                tableDetail.TableName = tableName.ToString();
-                tableDetail.tableViews = tables;
+                tableDetail.tableName = tableName.ToString();
+                tableDetail.tableDetail = tables;
             }
             else
             {
@@ -180,15 +190,15 @@ namespace DatabaseConnectionTask
                         while (reader.Read())
                         {
                             TableView tableView = new TableView();
-                            tableView.ColumnName = reader["COLUMN_NAME"].ToString();
-                            tableView.DataType = reader["DATA_TYPE"].ToString();
-                            tableView.MaxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
-                            tableView.Nullable = reader["IS_NULLABLE"].ToString();
+                            tableView.columnName = reader["COLUMN_NAME"].ToString();
+                            tableView.dataType = reader["DATA_TYPE"].ToString();
+                            tableView.maxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
+                            tableView.nullable = reader["IS_NULLABLE"].ToString();
 
                             tables.Add(tableView);
                         }
-                        tableDetail.TableName = item.ToString();
-                        tableDetail.tableViews = tables;
+                        tableDetail.tableName = item.ToString();
+                        tableDetail.tableDetail = tables;
                     }
                     else
                     {

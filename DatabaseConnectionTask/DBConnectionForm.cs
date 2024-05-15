@@ -1,8 +1,5 @@
-using DatabaseConnectionTask.Model;
+using DatabaseConnectionTask.Constants;
 using System.Data.SqlClient;
-using System.Xml.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace DatabaseConnectionTask
 {
@@ -38,8 +35,8 @@ namespace DatabaseConnectionTask
         private void InitializeCheckboxList()
         {
             checkboxList = new CheckedListBox();
-            checkboxList.Dock = DockStyle.Fill; // Fill the entire form
-            this.Controls.Add(checkboxList); // Add CheckedListBox to form
+            checkboxList.Dock = DockStyle.Fill;
+            this.Controls.Add(checkboxList);
         }
 
         private void submit_Click(object sender, EventArgs e)
@@ -48,13 +45,7 @@ namespace DatabaseConnectionTask
             errorProviderDBName.Clear();
             errorProviderDBLoginID.Clear();
             errorProviderDBPassword.Clear();
-            //if (string.IsNullOrWhiteSpace(ServerName.Text))
-            //{
-            //    ServerName.BackColor = Color.LightPink;
-            //    MessageBox.Show("Email field is required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //    ServerName.Focus();
-            //    return;
-            //}
+
             bool isValid = true;
             string serverName = ServerName.Text.Trim();
             string dbName = DBName.Text.Trim();
@@ -63,31 +54,33 @@ namespace DatabaseConnectionTask
 
             if (string.IsNullOrWhiteSpace(serverName))
             {
-                errorProviderServerName.SetError(ServerName, "Server name is required.");
+                errorProviderServerName.SetError(ServerName, Messages.servernamerequired);
                 isValid = false;
             }
 
             if (string.IsNullOrWhiteSpace(dbName))
             {
-                errorProviderDBName.SetError(DBName, "Database name is required.");
+                errorProviderDBName.SetError(DBName, Messages.datbaserequired);
                 isValid = false;
             }
 
             if (string.IsNullOrWhiteSpace(username))
             {
-                errorProviderDBLoginID.SetError(DBLoginID, "Username is required.");
+                errorProviderDBLoginID.SetError(DBLoginID, Messages.usernamerequired);
                 isValid = false;
             }
 
             if (string.IsNullOrWhiteSpace(password))
             {
-                errorProviderDBPassword.SetError(DBPassword, "Password is required.");
+                errorProviderDBPassword.SetError(DBPassword, Messages.passwordrequired);
                 isValid = false;
             }
 
             if (!isValid)
                 return;
+
             Loader loader = new Loader();
+
             string connectionString = $"data source={serverName};initial catalog={dbName};user id={username};password={password};MultipleActiveResultSets=True;";
 
             try
@@ -100,13 +93,11 @@ namespace DatabaseConnectionTask
                 if (connection.State == System.Data.ConnectionState.Open)
                 {
                     loader.Hide();
-                    MessageBox.Show("Connected to database successfully!");
+                    MessageBox.Show(Messages.connectsucessfully);
                     this.Hide();
                     List<string> tableNames = new List<string>();
-                    // Fill the checkbox list and add table names to the list
                     FillCheckboxList(dbName, tableNames);
 
-                    // Show the TableList form and pass the table names
                     TableList tableListForm = new TableList(tableNames, dbName, connectionString);
                     tableListForm.Show();
                 }
@@ -114,7 +105,7 @@ namespace DatabaseConnectionTask
                 {
                     loader.Hide();
                     this.Show();
-                    MessageBox.Show("Failed to connect to database!");
+                    MessageBox.Show(Messages.connectionfaild);
                 }
             }
             catch (Exception ex)
@@ -144,23 +135,15 @@ namespace DatabaseConnectionTask
                 }
                 else
                 {
-                    MessageBox.Show("No tables found in the database.");
+                    MessageBox.Show(Messages.notablefound);
                 }
 
                 reader.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error while filling checkbox list: " + ex.Message);
+                MessageBox.Show(Messages.errorforcheckbox + ex.Message);
             }
-        }
-
-        private void DBConnection_Load(object sender, EventArgs e)
-        {
-            //List<string> tableNames = new List<string> { "Refund", "City", "Class" };
-            //string Dbname = "SuperariLife";
-            //TableList tableList = new TableList(tableNames , Dbname , "");
-            //tableList.Show();
         }
     }
 }

@@ -97,7 +97,6 @@
             ServerName.Name = "ServerName";
             ServerName.Size = new Size(192, 23);
             ServerName.TabIndex = 6;
-            //ServerName.TextChanged += ServerName_TextChanged;
             // 
             // DBName
             // 
@@ -160,7 +159,6 @@
             Controls.Add(Title);
             Name = "DBConnection";
             Text = "DatabaseConnectionForm";
-            Load += DBConnection_Load;
             ResumeLayout(false);
             PerformLayout();
         }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -9,9 +10,10 @@ namespace DatabaseConnectionTask
 {
     public partial class TableDetails : Form
     {
-        private List<TableDetail> tableDetails;
+        private SqlConnection connection;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private Panel panel1;
+        private List<TableDetail> tableDetails;
         private List<string> tableNames;
         private string connectionString;
         private string dbName;
@@ -66,7 +68,7 @@ namespace DatabaseConnectionTask
             {
                 // Create CheckBox for table selection
                 CheckBox tableCheckBox = new CheckBox();
-                tableCheckBox.Text = data.TableName;
+                tableCheckBox.Text = data.tableName;
                 tableCheckBox.AutoSize = true;
                 tableCheckBox.Top = currentTop;
                 tableCheckBox.Left = 20;
@@ -89,13 +91,13 @@ namespace DatabaseConnectionTask
                 tableDataGridView.Columns.Add("MaxLength", "Max Length");
                 tableDataGridView.Columns.Add("Nullable", "Is Nullable");
 
-                foreach (var row in data.tableViews)
+                foreach (var row in data.tableDetail)
                 {
-                    tableDataGridView.Rows.Add(row.ColumnName, row.DataType, row.MaxLength, row.Nullable);
+                    tableDataGridView.Rows.Add(row.columnName, row.dataType, row.maxLength, row.nullable);
                 }
 
                 // Set DataGridView height based on the number of rows
-                int dgvHeight = (data.tableViews.Count + 1) * 25; // Header + rows
+                int dgvHeight = (data.tableDetail.Count + 1) * 25; // Header + rows
                 tableDataGridView.Height = Math.Min(dgvHeight, 150); // Limit to 150 pixels max
 
                 panel1.Controls.Add(tableDataGridView);
@@ -135,7 +137,64 @@ namespace DatabaseConnectionTask
 
         private void SubmitButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Submit button clicked");
+            List<string> selectedTables = new List<string>();
+
+
+            // Iterate through the controls in panel1
+            foreach (Control control in panel1.Controls)
+            {
+                if (control is CheckBox checkBox && checkBox.Checked)
+                {
+                    // If it's a CheckBox and it's checked, add its text (table name) to the list
+                    selectedTables.Add(checkBox.Text);
+                }
+            }
+
+            List<TableDetail> tableDetailsList = new List<TableDetail>();
+            foreach (string item in selectedTables)
+            {
+                connection = new SqlConnection(connectionString);
+                connection.Open(); // Open the connection
+
+                string query = $"SELECT COLUMN_NAME, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{item}';";
+                //string query = $"SELECT IU.COLUMN_NAME,IS1.DATA_TYPE  FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE IU INNER JOIN INFORMATION_SCHEMA.COLUMNS IS1 ON IU.TABLE_NAME = IS1.TABLE_NAME AND IU.COLUMN_NAME = IS1.COLUMN_NAME  WHERE IU.TABLE_NAME = '{item}' AND IU.CONSTRAINT_NAME LIKE '%PK%'";
+                SqlCommand command = new SqlCommand(query, connection);
+                SqlDataReader reader = command.ExecuteReader();
+
+                TableDetail tableDetail = new TableDetail();
+                if (reader.HasRows)
+                {
+                    List<TableView> tables = new List<TableView>();
+
+                    while (reader.Read())
+                    {
+                        TableView tableView = new TableView();
+                        tableView.tableName = item;
+                        tableView.columnName = reader["COLUMN_NAME"].ToString();
+                        tableView.dataType = reader["DATA_TYPE"].ToString();
+                        tableView.maxLength = reader["CHARACTER_MAXIMUM_LENGTH"].ToString();
+                        tableView.nullable = reader["IS_NULLABLE"].ToString();
+
+                        tables.Add(tableView);
+                    }
+                    tableDetail.tableName = item.ToString();
+                    tableDetail.tableDetail = tables;
+                }
+                else
+                {
+                    MessageBox.Show("No tables found in the database.");
+                }
+                reader.Close();
+                tableDetailsList.Add(tableDetail);
+            }
+            this.Hide();
+            GenerateFile generateFile = new GenerateFile(tableDetailsList,tableDetails,tableNames,dbName,connectionString);
+            generateFile.Show();
+
+            // Now selectedTables list contains the names of checked tables
+            // You can use this list as needed, for example, display the names in a message box
+            //string selectedTablesMessage = "Selected tables: " + string.Join(", ", selectedTables);
+            //MessageBox.Show(selectedTablesMessage);
         }
 
         private void BackButton_Click(object sender, EventArgs e)

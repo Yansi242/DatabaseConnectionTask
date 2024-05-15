@@ -8,15 +8,16 @@ namespace DatabaseConnectionTask.Model
 {
     public class TableDetail
     {
-        public string TableName { get; set; }
-        public List<TableView> tableViews { get; set; }
+        public string tableName { get; set; }
+        public List<TableView> tableDetail { get; set; }
        
     }
     public class TableView
     {
-        public string ColumnName { get; set; }
-        public string DataType { get; set; }
-        public string MaxLength { get; set; }
-        public string Nullable { get; set; }
+        public string tableName { get; set; }
+        public string columnName { get; set; }
+        public string dataType { get; set; }
+        public string maxLength { get; set; }
+        public string nullable { get; set; }
     }
 }

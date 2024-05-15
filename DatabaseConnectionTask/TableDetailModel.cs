@@ -23,7 +23,7 @@ namespace DatabaseConnectionTask
         {
             // Create and style the title label
             Label titleLabel = new Label();
-            titleLabel.Text = $"Details of Table: {tableDetails.TableName}"; // Modify title to include table name
+            titleLabel.Text = $"Details of Table: {tableDetails.tableName}"; // Modify title to include table name
             titleLabel.Font = new Font("Arial", 16, FontStyle.Bold);
             titleLabel.TextAlign = ContentAlignment.MiddleCenter;
             titleLabel.Dock = DockStyle.Top;
@@ -33,7 +33,7 @@ namespace DatabaseConnectionTask
             // Create TableLayoutPanel to organize controls
             TableLayoutPanel tableLayoutPanel = new TableLayoutPanel();
             tableLayoutPanel.Dock = DockStyle.Fill;
-            tableLayoutPanel.RowCount = tableDetails.tableViews.Count + 1; // +1 for title
+            tableLayoutPanel.RowCount = tableDetails.tableDetail.Count + 1; // +1 for title
             tableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50)); // Title row
 
             // Add controls to TableLayoutPanel
@@ -56,9 +56,9 @@ namespace DatabaseConnectionTask
             tableDataGridView.Columns.Add("Nullable", "Is Nullable");
 
             // Add rows to DataGridView
-            foreach (TableView tableView in tableDetails.tableViews)
+            foreach (TableView tableView in tableDetails.tableDetail)
             {
-                tableDataGridView.Rows.Add(tableView.ColumnName, tableView.DataType, tableView.MaxLength, tableView.Nullable);
+                tableDataGridView.Rows.Add(tableView.columnName, tableView.dataType, tableView.maxLength, tableView.nullable);
             }
 
             // Add DataGridView to TableLayoutPanel
