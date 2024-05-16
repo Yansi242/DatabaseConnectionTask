@@ -89,20 +89,32 @@ namespace DatabaseConnectionTask
             backButton.ForeColor = Color.Black; 
             backButton.Width = 100;
             backButton.Height = 35; 
-            backButton.Location = new Point(this.ClientSize.Width / 2 - 100, listViewTables.Bottom + 20);
+            backButton.Location = new Point(this.ClientSize.Width / 2 - 200, listViewTables.Bottom + 20);
             backButton.Click += BackButton_Click;
             this.Controls.Add(backButton);
 
             // Create and style the submit button
             Button submitButton = new Button();
-            submitButton.Text = "Generate File";
+            submitButton.Text = "Generate File in Mvc core";
             submitButton.BackColor = Color.GhostWhite; 
             submitButton.ForeColor = Color.Black; 
-            submitButton.Width = 100; 
+            submitButton.Width = 150; 
             submitButton.Height = 35; 
-            submitButton.Location = new Point(this.ClientSize.Width / 2 + 10, listViewTables.Bottom + 20);
+            submitButton.Location = new Point(this.ClientSize.Width / 2 + 50, listViewTables.Bottom + 20);
             submitButton.Click += SubmitButton_Click;
             this.Controls.Add(submitButton);
+
+            // Create and style the "Add Another" button
+            Button generatefile = new Button();
+            generatefile.Text = "Generate File in Angular";
+            generatefile.BackColor = Color.GhostWhite;
+            generatefile.ForeColor = Color.Black;
+            generatefile.Width = 150;
+            generatefile.Height = 35;
+            generatefile.Location = new Point(this.ClientSize.Width / 2 - 100, listViewTables.Bottom + 20);
+            generatefile.Click += AddAnotherButton_Click;
+            this.Controls.Add(generatefile);
+
         }
 
 
@@ -120,26 +132,23 @@ namespace DatabaseConnectionTask
             generateFile.projectName = projectName;
             generateFile.tableDetailList = TableDetailsList;
 
-            string filePath = await GenerateProjectFile(generateFile);
+            string apiUrl = "http://192.168.1.38:4501/api/file-generator/export";
+            string filePath = await GenerateProjectFile(generateFile,apiUrl);
             if (filePath != null)
             {
                 this.Hide();
                 MessageBox.Show("File saved at: " + filePath);
             }
-            else
-            {
-                MessageBox.Show("File generation failed.");
-            }
 
         }
 
-        protected async Task<string> GenerateProjectFile(generatefilemodel generateFile)
+        protected async Task<string> GenerateProjectFile(generatefilemodel generateFile, string apiUrl)
         {
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    var apiUrLexport = "http://192.168.3.5:4001/api/file-generator/export";
+                    var apiUrLexport = apiUrl;
 
                     // Serialize generateFile object to JSON
                     var jsonContent = new StringContent(JsonConvert.SerializeObject(generateFile), Encoding.UTF8, "application/json");
@@ -178,6 +187,22 @@ namespace DatabaseConnectionTask
                 MessageBox.Show("Error: " + ex.Message);
             }
             return null; // Return null if there's an error
+        }
+
+        private async void AddAnotherButton_Click(object sender, EventArgs e)
+        {
+            string projectName = projectNameTextBox.Text;
+            generatefilemodel generateFile = new generatefilemodel();
+            generateFile.projectName = projectName;
+            generateFile.tableDetailList = TableDetailsList;
+
+            string apiUrl = "http://192.168.1.38:4501/api/file-generator/export-angular";
+            string filePath = await GenerateProjectFile(generateFile, apiUrl);
+            if (filePath != null)
+            {
+                this.Hide();
+                MessageBox.Show("File saved at: " + filePath);
+            }
         }
 
     }
