@@ -1,4 +1,5 @@
 using DatabaseConnectionTask.Constants;
+using DatabaseConnectionTask.Model;
 using System.Data.SqlClient;
 
 namespace DatabaseConnectionTask
@@ -95,10 +96,17 @@ namespace DatabaseConnectionTask
                     loader.Hide();
                     MessageBox.Show(Messages.connectsucessfully);
                     this.Hide();
+
+                    exportModel exportmodel = new exportModel();
+                    exportmodel.serverName = serverName;
+                    exportmodel.login = username;
+                    exportmodel.password = password;
+                    exportmodel.databaseName = dbName;
+
                     List<string> tableNames = new List<string>();
                     FillCheckboxList(dbName, tableNames);
 
-                    TableList tableListForm = new TableList(tableNames, dbName, connectionString);
+                    TableList tableListForm = new TableList(tableNames, dbName, connectionString, exportmodel);
                     tableListForm.Show();
                 }
                 else

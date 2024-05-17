@@ -5,8 +5,10 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 using DatabaseConnectionTask.Model;
+using Newtonsoft.Json;
 
 namespace DatabaseConnectionTask
 {
@@ -15,18 +17,22 @@ namespace DatabaseConnectionTask
         private SqlConnection connection;
         private string connectionString;
         private ListView listViewTables;
+        private Button newButton;
         private Button submitButton;
         private List<string> tableNames;
         private string Databasename;
+        private exportModel modeldata;
 
-        public TableList(List<string> tableNames, string Dbname, string connectionString)
+        public TableList(List<string> tableNames, string Dbname, string connectionString, exportModel model)
         {
             InitializeComponent();
             this.connectionString = connectionString;
             this.tableNames = tableNames;
             this.Databasename = Dbname;
+            this.modeldata = model;
             //InitializeCheckedListBox(tableNames, Dbname);
             InitializeListView(tableNames, Dbname);
+            newButton.Click += NewButton_Click;
             submitButton.Click += SubmitButton_Click;
         }
 
@@ -72,7 +78,7 @@ namespace DatabaseConnectionTask
             submitButton.Width = 100; // Setting a small width size
             submitButton.Height = 35; // Setting a specific height
             submitButton.Anchor = AnchorStyles.Bottom; // Anchor to bottom
-            submitButton.Location = new Point((this.ClientSize.Width - submitButton.Width) / 2, this.ClientSize.Height - submitButton.Height - 20); // Adjust location
+            submitButton.Location = new Point((this.ClientSize.Width - submitButton.Width) / 2 - 10, this.ClientSize.Height - submitButton.Height - 20); // Adjust location
             this.Controls.Add(submitButton);
 
             // Create and style the back button
@@ -87,6 +93,18 @@ namespace DatabaseConnectionTask
             backButton.Location = new Point((this.ClientSize.Width - backButton.Width) / 2 - submitButton.Width - 20, this.ClientSize.Height - backButton.Height - 20); // Adjust location
             backButton.Click += BackButton_Click; // Handle click event
             this.Controls.Add(backButton);
+
+            // Create and style the new button
+            newButton = new Button();
+            newButton.Text = "Export Data Dictionary"; // Set the text for the new button
+            newButton.Font = new Font("Arial", 11, FontStyle.Regular);
+            newButton.BackColor = Color.GhostWhite; // Setting a different background color
+            newButton.ForeColor = Color.Black; // Setting text color
+            newButton.Width = 180; // Setting a small width size
+            newButton.Height = 35; // Setting a specific height
+            newButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left; ; // Anchor to bottom
+            newButton.Location = new Point((this.ClientSize.Width - newButton.Width) / 2 + submitButton.Width + 40, this.ClientSize.Height - newButton.Height - 20); // Adjust location below submit and back buttons
+            this.Controls.Add(newButton);
 
             // Adjust form layout to center contents vertically
             int totalHeight = titleLabel.Height + listViewTables.Height + submitButton.Height + 20;
@@ -115,10 +133,10 @@ namespace DatabaseConnectionTask
                 checkedItems.Add(item.Text);
             }
 
-            if(checkedItems.Count > 0)
+            if (checkedItems.Count > 0)
             {
                 // Do something with the checked items
-                TableDetails(checkedItems, connectionString);
+                TableDetails(checkedItems, connectionString, modeldata);
                 //MessageBox.Show("Table data submitted");
                 this.Close();
             }
@@ -127,7 +145,7 @@ namespace DatabaseConnectionTask
                 MessageBox.Show("Please Select Tables for next step !!");
                 this.Show();
             }
-            
+
         }
 
         private void ShowTableDetails(string tableName)
@@ -167,7 +185,7 @@ namespace DatabaseConnectionTask
             tableDetailsForm.Show();
         }
 
-        private void TableDetails(List<string> checkedItems, string connectionString)
+        private void TableDetails(List<string> checkedItems, string connectionString,exportModel model)
         {
             List<TableDetail> tableDetailsList = new List<TableDetail>();
             try
@@ -207,7 +225,7 @@ namespace DatabaseConnectionTask
                     reader.Close();
                     tableDetailsList.Add(tableDetail);
                 }
-                TableDetails tableDetailsForm = new TableDetails(tableDetailsList,this.tableNames,this.Databasename,this.connectionString);
+                TableDetails tableDetailsForm = new TableDetails(tableDetailsList, this.tableNames, this.Databasename, this.connectionString,model);
                 tableDetailsForm.Show();
             }
             catch (Exception ex)
@@ -224,6 +242,59 @@ namespace DatabaseConnectionTask
             databaseConnectionForm.Show();
             this.Hide();
         }
+
+        private async void NewButton_Click(object sender, EventArgs e)
+        {
+            string apiUrl = "http://192.168.1.38:4501/api/DataDictionaryGenerator/export";
+            string filePath = await exportFile(apiUrl);
+            if (filePath != null)
+            {
+                this.Hide();
+                MessageBox.Show("File saved at: " + filePath);
+            }
+        }
+        protected async Task<string> exportFile(string apiUrl)
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(modeldata), Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await client.PostAsync(apiUrl, jsonContent);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        byte[] fileBytes = await response.Content.ReadAsByteArrayAsync();
+
+                        using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                        {
+                            saveFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+                            saveFileDialog.Title = "Save Excel File";
+                            saveFileDialog.FileName = "export.xlsx";
+
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                string filePath = saveFileDialog.FileName;
+                                File.WriteAllBytes(filePath, fileBytes);
+                                return filePath;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("File generation request failed: " + response.ReasonPhrase);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle error
+                MessageBox.Show("Error: " + ex.Message);
+            }
+            return null; // Return null if there's an error
+        }
+
 
         private void TableList_Load(object sender, EventArgs e)
         {

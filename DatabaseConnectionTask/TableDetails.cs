@@ -19,13 +19,15 @@ namespace DatabaseConnectionTask
         private string dbName;
         private Button submitButton;
         private Button backButton;
+        private exportModel exportModel;
 
-        public TableDetails(List<TableDetail> tableDetails, List<string> tableNames, string dbName, string connectionString)
+        public TableDetails(List<TableDetail> tableDetails, List<string> tableNames, string dbName, string connectionString,exportModel model)
         {
             InitializeComponent();
             this.tableDetails = tableDetails;
             this.tableNames = tableNames;
             this.dbName = dbName;
+            this.exportModel = model;
             this.connectionString = connectionString;
             InitializeControls();
             InitializeButtons();
@@ -188,7 +190,7 @@ namespace DatabaseConnectionTask
                 tableDetailsList.Add(tableDetail);
             }
             this.Hide();
-            GenerateFile generateFile = new GenerateFile(tableDetailsList,tableDetails,tableNames,dbName,connectionString);
+            GenerateFile generateFile = new GenerateFile(tableDetailsList,tableDetails,tableNames,dbName,connectionString,exportModel);
             generateFile.Show();
 
             // Now selectedTables list contains the names of checked tables
@@ -200,7 +202,7 @@ namespace DatabaseConnectionTask
         private void BackButton_Click(object sender, EventArgs e)
         {
             this.Close();
-            TableList tableListForm = new TableList(tableNames, dbName, connectionString);
+            TableList tableListForm = new TableList(tableNames, dbName, connectionString,exportModel);
             tableListForm.Show();
         }
     }

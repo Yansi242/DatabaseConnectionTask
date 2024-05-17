@@ -21,13 +21,15 @@ namespace DatabaseConnectionTask
         private List<string> tableNames;
         private string connectionString;
         private string dbName;
+        private exportModel export;
         TextBox projectNameTextBox = new TextBox();
-        public GenerateFile(List<TableDetail> tableDetailsList, List<TableDetail> tableDetails, List<string> tableNames, string dbName, string connectionString)
+        public GenerateFile(List<TableDetail> tableDetailsList, List<TableDetail> tableDetails, List<string> tableNames, string dbName, string connectionString,exportModel model)
         {
             this.TableDetailsList = tableDetailsList;
             this.tableDetails = tableDetails;
             this.tableNames = tableNames;
             this.dbName = dbName;
+            this.export = model;
             this.connectionString = connectionString;
             InitializeComponent();
             InitializeControls();
@@ -117,11 +119,10 @@ namespace DatabaseConnectionTask
 
         }
 
-
         private void BackButton_Click(object sender, EventArgs e)
         {
             this.Close(); 
-            TableDetails tabledetails = new TableDetails(tableDetails,tableNames,dbName,connectionString);
+            TableDetails tabledetails = new TableDetails(tableDetails,tableNames,dbName,connectionString,export);
             tabledetails.Show();
         }
 
